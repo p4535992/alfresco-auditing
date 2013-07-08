@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<bean id="FileFolderService_transaction"
+		class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="list*">${server.transaction.mode.readOnly}</prop>
+				<prop key="search*">${server.transaction.mode.readOnly}</prop>
+				<prop key="get*">${server.transaction.mode.readOnly}</prop>
+				<prop key="resolve*">${server.transaction.mode.readOnly}</prop>
+				<prop key="*">${server.transaction.mode.default}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="SVAuditFileFolderServiceProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>org.alfresco.service.cmr.model.FileFolderService</value>
+		</property>
+		<property name="target">
+			<ref bean="fileFolderService" />
+		</property>
+		<property name="interceptorNames">
+			<list>
+                <idref local="FileFolderService_transaction"/>
+                <idref bean="filenameFilteringInterceptor"/>
+                <idref local="AuditMethodInterceptor"/>
+                <idref local="exceptionTranslator"/>
+                <idref bean="mlTranslationInterceptor"/>
+                <idref bean="mlContentInterceptor"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="exceptionTranslator"
+		class="org.alfresco.repo.security.permissions.impl.ExceptionTranslatorMethodInterceptor" />
+		
+	<bean id="NodeService_transaction"
+		class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="exist*">${server.transaction.mode.readOnly}</prop>
+				<prop key="get*">${server.transaction.mode.readOnly}</prop>
+				<prop key="has*">${server.transaction.mode.readOnly}</prop>
+				<prop key="*">${server.transaction.mode.default}</prop>
+			</props>
+		</property>
+	</bean>
+	
+    <!-- AuditMethodInterceptor - this has nothing to do with our audit code,
+    	this is purely to allow us to use the FileFolderService proxy -->
+    <bean id="AuditMethodInterceptor" class="org.alfresco.repo.audit.AuditMethodInterceptor">
+        <property name="beanIdentifier">
+            <ref bean="beanIdentifier"/>
+        </property>
+        <property name="auditComponent">
+            <ref bean="auditComponent"/>
+        </property>
+        <property name="transactionService">
+            <ref bean="transactionService"/>
+        </property>
+        <property name="threadPoolExecutor">
+            <ref bean="auditThreadPool"/>
+        </property>
+    </bean>
+
+	<bean id="SVAuditNodeServiceProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<list>
+				<value>org.alfresco.service.cmr.repository.NodeService</value>
+			</list>
+		</property>
+		<property name="target">
+			<ref bean="nodeService" />
+		</property>
+		<property name="interceptorNames">
+			<list>
+               <idref local="NodeService_transaction"/>
+               <idref local="AuditMethodInterceptor"/>
+               <idref local="exceptionTranslator"/>
+               <idref bean="disableAuditablePolicySetPropertyInterceptor"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean name="auditFilter" class="com.surevine.alfresco.audit.SpringAuditFilterBean">
+		<property name="repository" ref="auditRepository" />
+		<property name="authenticationService" ref="AuthenticationService" />
+		<property name="listeners">
+			<set>
+				<ref bean="copyDocumentAuditEventListener" />
+				<ref bean="createDocumentCommentAuditEventListener" />
+				<ref bean="createDiscussionAuditEventListener" />
+				<ref bean="createDiscussionReplyAuditEventListener" />
+				<ref bean="createFolderAuditEventListener" />
+				<ref bean="createWikiPageAuditEventListener" />
+				<ref bean="deleteDiscussionAuditEventListener" />
+				<ref bean="deleteDocumentAuditEventListener" />
+				<ref bean="deleteDocumentCommentAuditEventListener" />
+				<ref bean="deleteFolderAuditEventListener" />
+				<ref bean="deleteWikiPageAuditEventListener" />
+				<ref bean="downloadDocumentAuditEventListener" />
+				<ref bean="editDiscussionReplyAuditEventListener" />
+				<ref bean="editDiscussionTopicAuditEventListener" />
+				<ref bean="editDocumentCommentAuditEventListener" />
+				<ref bean="lockDocumentAuditEventListener" />
+				<ref bean="moveDocumentAuditEventListener" />
+				<ref bean="multiDocumentDeleteAuditEventListener" />
+				<ref bean="renameWikiPageAuditEventListener" />
+				<ref bean="revertDocumentVersionAuditEventListener" />
+				<ref bean="safeMoveDocumentAuditEventListener" />
+				<ref bean="searchSiteAuditEventListener" />
+				<ref bean="unlockDocumentAuditEventListener" />
+				<ref bean="updateDocumentAuditEventListener" />
+				<ref bean="updateDocumentMetadataAuditEventListener" />
+				<ref bean="updateDocumentPermissionsAuditEventListener" />
+				<ref bean="updateWikiPageAuditEventListener" />
+				<ref bean="uploadDocumentAuditEventListener" />
+				<ref bean="viewDiscussionTopicAuditEventListener" />
+				<ref bean="viewDocumentDetailsAuditEventListener" />
+				<ref bean="viewWikiPageAuditEventListener" />
+				<ref bean="revertWikiPageAuditEventListener" />
+				<ref bean="markForDeleteAuditEventListener" />
+				<ref bean="removeDeletionMarkAuditEventListener" />
+				<ref bean="undeleteAuditEventListener" />
+				<ref bean="immediateArchiveAuditEventListener" />
+			</set>
+		</property>
+	</bean>
+
+	<bean name="SVNodeRefResolver" class="com.surevine.alfresco.audit.NodeRefResolverImpl">
+		<property name="searchService" ref="searchService" />
+		<property name="fileFolderService" ref="SVAuditFileFolderServiceProxy" />
+		<property name="repository" ref="repositoryHelper"/>
+		<property name="nodeService" ref="SVAuditNodeServiceProxy" />
+	</bean>
+	
+	<bean name="abstractAuditEventListener" class="com.surevine.alfresco.audit.listeners.AbstractAuditEventListener" abstract="true">
+		<property name="nodeService" ref="SVAuditNodeServiceProxy" />
+		<property name="nodeRefResolver" ref="SVNodeRefResolver" />
+	</bean>
+
+	<bean name="copyDocumentAuditEventListener" class="com.surevine.alfresco.audit.listeners.CopyDocumentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="createDocumentCommentAuditEventListener" class="com.surevine.alfresco.audit.listeners.CreateDocumentCommentAuditEventListener" parent="abstractAuditEventListener"/>
+	
+	<bean name="createDiscussionAuditEventListener"
+			class="com.surevine.alfresco.audit.listeners.CreateDiscussionAuditEventListener"
+			parent="abstractAuditEventListener">
+	</bean>
+	
+	<bean name="createDiscussionReplyAuditEventListener" class="com.surevine.alfresco.audit.listeners.CreateDiscussionReplyAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="createFolderAuditEventListener" class="com.surevine.alfresco.audit.listeners.CreateFolderAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="createWikiPageAuditEventListener" class="com.surevine.alfresco.audit.listeners.CreateWikiPageAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="deleteDiscussionAuditEventListener" class="com.surevine.alfresco.audit.listeners.DeleteDiscussionAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="deleteDocumentAuditEventListener" class="com.surevine.alfresco.audit.listeners.DeleteDocumentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="deleteDocumentCommentAuditEventListener" class="com.surevine.alfresco.audit.listeners.DeleteDocumentCommentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="deleteFolderAuditEventListener" class="com.surevine.alfresco.audit.listeners.DeleteFolderAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="deleteWikiPageAuditEventListener" class="com.surevine.alfresco.audit.listeners.DeleteWikiPageAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="downloadDocumentAuditEventListener" class="com.surevine.alfresco.audit.listeners.DownloadDocumentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="editDiscussionReplyAuditEventListener" class="com.surevine.alfresco.audit.listeners.EditDiscussionReplyAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="editDiscussionTopicAuditEventListener" class="com.surevine.alfresco.audit.listeners.EditDiscussionTopicAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="editDocumentCommentAuditEventListener" class="com.surevine.alfresco.audit.listeners.EditDocumentCommentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="markForDeleteAuditEventListener" class="com.surevine.alfresco.audit.listeners.MarkForDeleteAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="immediateArchiveAuditEventListener" class="com.surevine.alfresco.audit.listeners.ImmediateArchiveAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="lockDocumentAuditEventListener" class="com.surevine.alfresco.audit.listeners.LockDocumentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="multiDocumentDeleteAuditEventListener" class="com.surevine.alfresco.audit.listeners.MultiDocumentDeleteAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="moveDocumentAuditEventListener" class="com.surevine.alfresco.audit.listeners.MoveDocumentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="removeDeletionMarkAuditEventListener" class="com.surevine.alfresco.audit.listeners.RemoveDeletionMarkAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="revertDocumentVersionAuditEventListener" class="com.surevine.alfresco.audit.listeners.RevertDocumentVersionAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="renameWikiPageAuditEventListener" class="com.surevine.alfresco.audit.listeners.RenameWikiPageAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="revertWikiPageAuditEventListener" class="com.surevine.alfresco.audit.listeners.RevertWikiPageAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="safeMoveDocumentAuditEventListener" class="com.surevine.alfresco.audit.listeners.SafeMoveDocumentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="searchSiteAuditEventListener" class="com.surevine.alfresco.audit.listeners.SearchSiteAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="unlockDocumentAuditEventListener" class="com.surevine.alfresco.audit.listeners.UnlockDocumentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="undeleteAuditEventListener" class="com.surevine.alfresco.audit.listeners.UndeleteAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="updateDocumentAuditEventListener" class="com.surevine.alfresco.audit.listeners.UpdateDocumentAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="updateDocumentMetadataAuditEventListener" class="com.surevine.alfresco.audit.listeners.UpdateDocumentMetadataAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="updateDocumentPermissionsAuditEventListener" class="com.surevine.alfresco.audit.listeners.UpdateDocumentPermissionsAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="updateWikiPageAuditEventListener" class="com.surevine.alfresco.audit.listeners.UpdateWikiPageAuditEventListener" parent="abstractAuditEventListener"/>
+	
+	<bean name="uploadDocumentAuditEventListener"
+			class="com.surevine.alfresco.audit.listeners.UploadDocumentAuditEventListener"
+			parent="abstractAuditEventListener">
+	</bean>
+	
+	<bean name="viewDiscussionTopicAuditEventListener" class="com.surevine.alfresco.audit.listeners.ViewDiscussionTopicAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="viewDocumentDetailsAuditEventListener" class="com.surevine.alfresco.audit.listeners.ViewDocumentDetailsAuditEventListener" parent="abstractAuditEventListener"/>
+	<bean name="viewWikiPageAuditEventListener" class="com.surevine.alfresco.audit.listeners.ViewWikiPageAuditEventListener" parent="abstractAuditEventListener"/>
+
+	<bean name="auditRepository" class="com.surevine.alfresco.audit.repo.JdbcAuditRepository">
+		<property name="dataSource" ref="auditDataSource"></property>
+	</bean>
+
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="auditDataSource" />
+	</bean>
+
+	<!-- Copied definition of the default data source, with the defaultAutoCommit 
+		property set to true -->
+	<!-- And setting of the transaction isolation level removed. -->
+	<bean id="auditDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName">
+			<value>${db.driver}</value>
+		</property>
+		<property name="url">
+			<value>${db.url}</value>
+		</property>
+		<property name="username">
+			<value>${db.username}</value>
+		</property>
+		<property name="password">
+			<value>${db.password}</value>
+		</property>
+		<property name="initialSize">
+			<value>${db.pool.initial}</value>
+		</property>
+		<property name="maxActive">
+			<value>${db.pool.max}</value>
+		</property>
+		<property name="minIdle">
+			<value>${db.pool.min}</value>
+		</property>
+		<property name="maxIdle">
+			<value>${db.pool.idle}</value>
+		</property>
+		<property name="defaultAutoCommit">
+			<value>true</value>
+		</property>
+	</bean>
+
+</beans>

@@ -1,0 +1,1 @@
+alter table alf_accounting_audit add time_spent NUMBER(19,0);
