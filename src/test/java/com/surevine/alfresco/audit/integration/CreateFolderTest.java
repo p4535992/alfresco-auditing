@@ -68,7 +68,6 @@ public class CreateFolderTest extends AbstractAuditIntegrationTestBase {
 
             assertEquals(TEST_REMOTE_ADDR, audited.getRemoteAddress());
             verifyGenericAuditMetadata(audited);
-            // TODO Can't get site name from node ref alone.
             assertEquals(TEST_SITE, audited.getSite());
             assertEquals(TEST_USER, audited.getUser());
             assertEquals(cut.getAction(), audited.getAction());

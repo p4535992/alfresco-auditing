@@ -63,7 +63,6 @@ public class ResponseModifiableMockFilterChain extends MockFilterChain {
             httpServletResponse.setStatus(this.status);
             httpServletResponse.flushBuffer();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

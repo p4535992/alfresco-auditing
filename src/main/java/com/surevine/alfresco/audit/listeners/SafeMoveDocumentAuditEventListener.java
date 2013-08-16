@@ -121,7 +121,7 @@ public class SafeMoveDocumentAuditEventListener extends PostAuditEventListener {
     public void setSpecificAuditMetadata(final Auditable auditable, final HttpServletRequest request,
             final JSONObject json, final BufferedHttpServletResponse response) throws JSONException {
 
-        // TODO No implementation here now, refactored out to accomodate multiples.
+        // No implementation here, refactored out to accomodate multiples.
     }
 
     @Override

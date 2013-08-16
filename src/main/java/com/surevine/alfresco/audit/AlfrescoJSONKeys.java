@@ -138,7 +138,6 @@ public final class AlfrescoJSONKeys {
     /**
      * Looks to be a duplicate of pageContent.
      */
-    // TODO Remove?
     public static final String WIKI_PAGE_CONTENT = "pageContent";
 
     /**

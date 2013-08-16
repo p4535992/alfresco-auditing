@@ -63,7 +63,7 @@ public class UpdateDocumentPermissionsAuditEventListener extends PostAuditEventL
     @Override
     public void setSpecificAuditMetadata(final Auditable auditable, final HttpServletRequest request,
             final JSONObject json, final BufferedHttpServletResponse response) throws JSONException {
-        // TODO Empty implementation needs refactored.
+        // Intentionally empty
     }
 
     @Override

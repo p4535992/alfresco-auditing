@@ -254,10 +254,10 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
                     } else if (EnhancedSecurityLabel.NATIONALITY_OWNER_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
                         tmpNationalOwner = item.getString();
                     } else if (EnhancedSecurityLabel.NATIONAL_CAVEATS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        // TODO this is the key when flash is not used.
+                        // This is the key when flash is not used.
                         tmpNationalityCaveats = item.getString();
                     } else if (EnhancedSecurityLabel.ESL_EYES.equalsIgnoreCase(item.getFieldName())) {
-                        // TODO This is the key when flash is used.
+                        // This is the key when flash is used.
                         tmpNationalityCaveats = item.getString();
                     } else if (EnhancedSecurityLabel.CAVEATS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
                         tmpCaveats = item.getString();
@@ -273,7 +273,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
             }
 
             // Now try to construct the ESL
-            // TODO move this into the ESL code.
+            // Note that this institutes a compile-time dependency on the ESL module, which we may wish to remove one day
             EnhancedSecurityLabel esl = new EnhancedSecurityLabel(tmpProtectiveMarking);
             esl.setNationalityOwner(tmpNationalOwner);
             esl.setNationalityCaveats(tmpNationalityCaveats);

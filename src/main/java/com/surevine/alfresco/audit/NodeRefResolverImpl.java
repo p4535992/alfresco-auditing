@@ -209,7 +209,7 @@ public class NodeRefResolverImpl implements NodeRefResolver {
         String revisedPath;
 
         if (path.startsWith(companyHome)) {
-            // Now we need to dispense with company home and then loose each of the namespace qualifiers.
+            // Now we need to dispense with company home and then lose each of the namespace qualifiers.
             revisedPath = path.substring(path.indexOf(companyHome) + companyHome.length(), path.length());
             Pattern p = Pattern.compile("/[a-z]+:");
             Matcher m = p.matcher(revisedPath);

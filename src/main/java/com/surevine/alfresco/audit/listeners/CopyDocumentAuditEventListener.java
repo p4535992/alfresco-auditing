@@ -63,7 +63,7 @@ public class CopyDocumentAuditEventListener extends PostAuditEventListener {
     @Override
     public void setSpecificAuditMetadata(final Auditable auditable, final HttpServletRequest request,
             final JSONObject post, final BufferedHttpServletResponse response) throws JSONException {
-        // TODO remove?
+        // Intentionally do nothing
     }
 
     @Override

@@ -88,8 +88,6 @@ public class BufferedServletOutputStream extends ServletOutputStream {
 
     @Override
     public void close() throws IOException {
-        // TODO Are there possible issues with the underlying stream being closed before a flush if the servlet is using
-        // a writer?
         underlyingStream.close();
     }
 

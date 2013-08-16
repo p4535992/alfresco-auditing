@@ -232,7 +232,7 @@ public abstract class AbstractAuditEventListener implements AuditEventListener {
 
             auditable.setDetails(getDetails(node));
             
-            // TODO version numbering should be resolved at a specific type.
+            // In the future, we may wish to resolve version numbering at a specific type.
             String version = (String) getNodeService().getProperty(node, ContentModel.PROP_VERSION_LABEL);
             if (version == null || version.equals("null") || version.trim().length() < 1) {
                 version = (String) getNodeService().getProperty(node, Version2Model.PROP_QNAME_VERSION_LABEL);
