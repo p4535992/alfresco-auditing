@@ -23,7 +23,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.surevine.alfresco</groupId>
 	<artifactId>alfresco_accounting</artifactId>
-	<version>1.4.2</version>
+	<version>1.4.2-SNAPSHOT</version>
 
 
 	<!-- O R G A N I S A T I O N I N F O R M A T I O N -->
@@ -41,7 +41,7 @@
 
 	<!-- Required by the release plugin -->
 	<scm>
-		<developerConnection>scm:svn:https://svn.surevine.net/integration/alfresco_accounting/tech/imp</developerConnection>
+		<developerConnection>scm:git:git@github.com:surevine/alfresco-auditing.git</developerConnection>
 	</scm>
 
 	<!-- R E P O S I T O R I E S -->
@@ -166,7 +166,7 @@
 		<dependency>
 			<groupId>com.surevine.alfresco</groupId>
 			<artifactId>svthemerepomodule</artifactId>
-			<version>2.31.0</version>
+			<version>2.34.0</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -199,10 +199,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.1</version>
-					<configuration>
-						<tagBase>https://svn.surevine.net/integration/alfresco_accounting/tech/tags</tagBase>
-					</configuration>
+					<version>2.4.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
