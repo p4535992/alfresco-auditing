@@ -164,12 +164,6 @@
 			<groupId>org.springframework.extensions.surf</groupId>
 			<artifactId>spring-surf-core</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.surevine.alfresco</groupId>
-			<artifactId>svthemerepomodule</artifactId>
-			<version>2.34.0</version>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
