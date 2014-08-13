@@ -80,15 +80,18 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
 
             int bytesRead = is.read(cache, (int) cacheBytes, (int) (cache.length - cacheBytes));
 
+            if(bytesRead == -1) {
+                return;
+            }
+            
+            //try testing is.available
+            
             cacheBytes += bytesRead;
 
             if (cacheBytes == cache.length) {
                 // We have filled the cache, let's increase the size
                 cacheSize += CACHE_INCREASE_SIZE;
-            } else {
-                // We're done. Let's get outta here.
-                return;
-            }
+            } 
         }
 
         // If we've got here we've either hit the cache limit, or the Content-Length was too big to start with
