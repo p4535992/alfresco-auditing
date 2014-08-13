@@ -52,7 +52,7 @@ public class DeleteDiscussionAuditEventListener extends DeleteAuditEventListener
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String pageContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
         return "discussions-topicview".equals(request.getParameter(AlfrescoJSONKeys.PAGE));
     }
 

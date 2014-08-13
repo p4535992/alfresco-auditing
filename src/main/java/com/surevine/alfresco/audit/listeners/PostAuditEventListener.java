@@ -21,23 +21,22 @@
 */
 package com.surevine.alfresco.audit.listeners;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.model.ContentModel;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.AuditItem;
@@ -78,11 +77,10 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
      * 
      * @throws JSONException
      */
-    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response,
-            final String postContent) throws JSONException {
+    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response) throws JSONException {
 
         Auditable toAudit = new AuditItem();
-        JSONObject postContentJSONObject = parseJSONFromPostContent(postContent);
+        JSONObject postContentJSONObject = parseJSONFromPostContent(request);
         if (postContentJSONObject != null) {
             setSecurityLabel(toAudit, postContentJSONObject);
             setTags(toAudit, postContentJSONObject);
@@ -120,19 +118,42 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
      *            from the request
      * @return valid JSONObject, otherwise null
      */
-    public static JSONObject parseJSONFromPostContent(final String postContent) {
+    public static JSONObject parseJSONFromPostContent(final HttpServletRequest request) {
 
+    	if(request.getAttribute("com.surevine.alfresco.audit.JSONData") != null) {
+    		return (JSONObject) request.getAttribute("com.surevine.alfresco.audit.JSONData");
+    	}
+    	
         JSONObject retVal = null;
-        if (postContent != null && !"".equals(postContent) && postContent.startsWith(JSON_START_STRING)) {
-            try {
-                retVal = new JSONObject(postContent);
-            } catch (JSONException e) {
-                logger.warn("Invalid JSON string parsed from post content ", e);
+        
+        InputStream inStream;
+        try {
+            inStream = request.getInputStream();
+        } catch (IOException eIO) {
+            logger.error("Error encountered while reading from the request stream", eIO);
+            return null;
+        }
+        
+        InputStreamReader reader = new InputStreamReader(inStream);
+        JSONTokener tokenizer = new JSONTokener(reader);
+        
+        try {
+            retVal = new JSONObject(tokenizer);
+        } catch (JSONException e) {
+            // We will only warn in the logs if it was supposed to be JSON
+            if("application/json".equals(request.getHeader("Content-Type"))) {
+                try {
+                    logger.warn("Invalid JSON string parsed from post content " + IOUtils.toString(request.getInputStream()), e);
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }            
             }
         }
+ 
+        request.setAttribute("com.surevine.alfresco.audit.JSONData", retVal);
 
         return retVal;
-
     }
 
     /**
@@ -210,139 +231,8 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
      *            post data if present
      * @return boolean whether an audit event is fired.
      */
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
         return request.getRequestURI().contains(getURIDesignator());
-    }
-
-
-    @SuppressWarnings("unchecked")
-    protected void parseFromMIMEData(final Auditable auditable, final HttpServletRequest request, final JSONObject json) {
-        if (ServletFileUpload.isMultipartContent(request)) {
-
-            ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-            upload.setHeaderEncoding("UTF-8");
-            // Parse the request
-            String tmpProtectiveMarking = null;
-            String tmpNationalOwner = null;
-            String tmpNationalityCaveats = null;
-            String tmpCaveats = null;
-            String tmpAtomal = null;
-            String tmpClosedGroups = null;
-            String tmpOpenGroups = null;
-            String tmpOrganisations = null;
-            String tmpNodeRef = null;
-            String tmpUploadDir = null;
-            List<FileItem> mimeItems;
-
-            try {
-                mimeItems = upload.parseRequest(request);
-                for (FileItem item : mimeItems) {
-                    if (!item.isFormField()) {
-                        auditable.setSource(item.getName());
-                    } else if ("siteId".equals(item.getFieldName())) {
-                        auditable.setSite(item.getString());
-                    } else if (EnhancedSecurityLabel.OPEN_GROUPS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        tmpOpenGroups = item.getString();
-                    } else if (EnhancedSecurityLabel.CLOSED_GROUPS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        tmpClosedGroups = item.getString();
-                    } else if (EnhancedSecurityLabel.ORGANISATIONS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        tmpOrganisations = item.getString();
-                    } else if (EnhancedSecurityLabel.ATOMAL_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        tmpAtomal = item.getString();
-                    } else if (EnhancedSecurityLabel.PROTECTIVE_MARKING_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        tmpProtectiveMarking = item.getString();
-                    } else if (EnhancedSecurityLabel.NATIONALITY_OWNER_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        tmpNationalOwner = item.getString();
-                    } else if (EnhancedSecurityLabel.NATIONAL_CAVEATS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        // This is the key when flash is not used.
-                        tmpNationalityCaveats = item.getString();
-                    } else if (EnhancedSecurityLabel.ESL_EYES.equalsIgnoreCase(item.getFieldName())) {
-                        // This is the key when flash is used.
-                        tmpNationalityCaveats = item.getString();
-                    } else if (EnhancedSecurityLabel.CAVEATS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                        tmpCaveats = item.getString();
-                    } else if ("updateNodeRef".equalsIgnoreCase(item.getFieldName())) {
-                        tmpNodeRef = item.getString();
-                    } else if ("uploadDirectory".equalsIgnoreCase(item.getFieldName())) {
-                        tmpUploadDir = item.getString();
-                    }
-                }
-            } catch (FileUploadException e) {
-                logger.error("Failure uploading file ", e);
-                return;
-            }
-
-            // Now try to construct the ESL
-            // Note that this institutes a compile-time dependency on the ESL module, which we may wish to remove one day
-            EnhancedSecurityLabel esl = new EnhancedSecurityLabel(tmpProtectiveMarking);
-            esl.setNationalityOwner(tmpNationalOwner);
-            esl.setNationalityCaveats(tmpNationalityCaveats);
-            esl.setCaveat(tmpCaveats);
-            String[] groupSet;
-
-            if (tmpOpenGroups != null && !"".equals(tmpOpenGroups)) {
-                groupSet = tmpOpenGroups.split(EnhancedSecurityLabel.DELIMITER);
-
-                for (String set : groupSet) {
-                    esl.addOpenGroup(set);
-                }
-            }
-
-            if (tmpClosedGroups != null && !"".equals(tmpClosedGroups)) {
-                groupSet = tmpClosedGroups.split(EnhancedSecurityLabel.DELIMITER);
-
-                for (String set : groupSet) {
-                    esl.addClosedGroup(set);
-                }
-            }
-            
-            if (tmpOrganisations != null && !"".equals(tmpOrganisations)) {
-                groupSet = tmpOrganisations.split(EnhancedSecurityLabel.DELIMITER);
-
-                for (String set : groupSet) {
-                    esl.addOrganisation(set);
-                }
-            }
-
-            if (tmpAtomal != null && !"".equals(tmpAtomal)) {
-                groupSet = tmpAtomal.split(EnhancedSecurityLabel.DELIMITER);
-
-                for (String set : groupSet) {
-                    esl.addAtomal(set);
-                }
-            }
-
-            // If the tmpNodeRef is null (for first time upload) then set to a default string
-            if (tmpNodeRef == null || tmpNodeRef.equals("")) {
-                tmpNodeRef = NODE_UNAVAILABLE;
-            }
-            
-            auditable.setNodeRef(tmpNodeRef);
-
-            // Default to the initial version
-            String version = INITIAL_VERSION;
-            
-            // It's a little more involved to get the version as we need to use the noderef to resolve the
-            // node itself and then get the label.
-            if (tmpNodeRef != null && NodeRef.isNodeRef(tmpNodeRef)) {
-                NodeRef tmpNode = new NodeRef(tmpNodeRef);
-
-                if (getNodeService().exists(tmpNode)) {
-                    version = (String) getNodeService()
-                            .getProperty(tmpNode, ContentModel.PROP_VERSION_LABEL);
-                }
-            }
-
-            auditable.setVersion(version);
-
-            auditable.setSecLabel(esl.toString());
-
-            if (tmpUploadDir != null) {
-                auditable.setDetails(tmpUploadDir);
-            }
-
-        }
-
     }
 
 }

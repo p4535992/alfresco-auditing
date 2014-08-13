@@ -52,7 +52,7 @@ public class ViewDiscussionTopicAuditEventListener extends GetAuditEventListener
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String pageContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
         if (request.getRequestURI().contains(URI_DESIGNATOR)
                 && !request.getRequestURI().contains("replies")) {
             return true;

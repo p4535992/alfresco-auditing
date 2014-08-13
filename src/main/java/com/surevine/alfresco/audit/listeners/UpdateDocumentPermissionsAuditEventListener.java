@@ -67,12 +67,11 @@ public class UpdateDocumentPermissionsAuditEventListener extends PostAuditEventL
     }
 
     @Override
-    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response,
-            final String postContent) throws JSONException {
+    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response) throws JSONException {
 
         List<Auditable> events = new ArrayList<Auditable>();
 
-        JSONObject json = parseJSONFromPostContent(postContent);
+        JSONObject json = parseJSONFromPostContent(request);
 
         if (json != null && json.has(AlfrescoJSONKeys.NODEREFS)) {
             JSONArray arr = json.getJSONArray(AlfrescoJSONKeys.NODEREFS);

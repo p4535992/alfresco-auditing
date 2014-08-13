@@ -138,21 +138,17 @@ public class SpringAuditFilterBean implements Filter {
 
         String method = httpServletRequest.getMethod();
 
-        String postContent = null;
-
         // Only override current HttpServletRequest with custom implementation if post data
         // will be read.
         if (MULTI_READ_HTTP_METHODS.contains(method)) {
             httpServletRequest = new MultiReadHttpServletRequest(httpServletRequest);
-
-            postContent = parsePostContent(httpServletRequest);
         }
 
         // Now iterate over each of the installed listeners searching to see if, firstly the http methods match
         // and secondly that an event is fired.
         for (AuditEventListener listener : listeners) {
 
-            if (listener.getMethod().equals(method) && listener.isEventFired(httpServletRequest, postContent)) {
+            if (listener.getMethod().equals(method) && listener.isEventFired(httpServletRequest)) {
 
                 // Need to allow the output to be read twice from the response
                 httpServletResponse = new BufferedHttpServletResponse((HttpServletResponse) response);
@@ -180,7 +176,7 @@ public class SpringAuditFilterBean implements Filter {
                             || listener instanceof UndeleteAuditEventListener
                             || listener instanceof ImmediateArchiveAuditEventListener) {
                         itemsToAudit = listener
-                                .populateAuditItems(httpServletRequest, httpServletResponse, postContent);
+                                .populateAuditItems(httpServletRequest, httpServletResponse);
 
                         // Continue with the filter chain
                         timer.start();
@@ -200,7 +196,7 @@ public class SpringAuditFilterBean implements Filter {
                         httpServletResponse.finish();
                         
                         itemsToAudit = listener
-                                .populateAuditItems(httpServletRequest, httpServletResponse, postContent);
+                                .populateAuditItems(httpServletRequest, httpServletResponse);
   
                     }
 

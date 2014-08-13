@@ -121,12 +121,11 @@ public class MoveDocumentAuditEventListener extends PostAuditEventListener {
     }
 
     @Override
-    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response,
-            final String postContent) throws JSONException {
+    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response) throws JSONException {
 
         List<Auditable> events = new ArrayList<Auditable>();
 
-        JSONObject json = parseJSONFromPostContent(postContent);
+        JSONObject json = parseJSONFromPostContent(request);
 
         String destFolder = request.getRequestURI().substring(
                 request.getRequestURI().lastIndexOf(DOCUMENT_LIBRARY) + DOCUMENT_LIBRARY.length());

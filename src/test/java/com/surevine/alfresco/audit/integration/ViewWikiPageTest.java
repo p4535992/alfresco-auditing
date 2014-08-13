@@ -102,6 +102,6 @@ public class ViewWikiPageTest extends AbstractAuditIntegrationTestBase {
         
         ViewWikiPageAuditEventListener viewWikiPageListener = (ViewWikiPageAuditEventListener)applicationContext.getBean("viewWikiPageAuditEventListener");
         
-        assertFalse("View of wiki main page incorrectly dealt with", viewWikiPageListener.isEventFired(mockRequest, ""));
+        assertFalse("View of wiki main page incorrectly dealt with", viewWikiPageListener.isEventFired(mockRequest));
     }
 }

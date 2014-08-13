@@ -52,7 +52,7 @@ public class DeleteWikiPageAuditEventListener extends DeleteAuditEventListener {
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String pageContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
         return "wiki".equals(request.getParameter(AlfrescoJSONKeys.PAGE));
     }
 

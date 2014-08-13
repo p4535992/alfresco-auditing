@@ -66,7 +66,7 @@ public class ViewDocumentDetailsAuditEventListener extends GetAuditEventListener
     }
 
     @Override
-    public boolean isEventFired(HttpServletRequest request, String postContent) {        
+    public boolean isEventFired(HttpServletRequest request) {        
         return ((request.getRequestURI().contains(URI_DESIGNATOR)) && 
                 request.getParameter("shortQNames") == null);
     }

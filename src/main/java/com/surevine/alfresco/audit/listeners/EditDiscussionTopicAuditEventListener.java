@@ -56,9 +56,9 @@ public class EditDiscussionTopicAuditEventListener extends PutAuditEventListener
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
 
-        JSONObject json = parseJSONFromPostContent(postContent);
+        JSONObject json = parseJSONFromPostContent(request);
         if (json != null) {
             return (request.getRequestURI().contains(URI_DESIGNATOR) && json.has(AlfrescoJSONKeys.TITLE));
         }

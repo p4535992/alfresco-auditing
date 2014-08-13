@@ -53,7 +53,7 @@ public class CreateDocumentCommentAuditEventListener extends PostAuditEventListe
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
         return request.getRequestURI().contains(URI_DESIGNATOR) && request.getRequestURI().contains("comments");
     }
 
