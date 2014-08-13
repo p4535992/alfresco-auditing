@@ -23,6 +23,8 @@ import com.surevine.esl.EnhancedSecurityLabel;
 public abstract class PostFormAuditEventListener extends PostAuditEventListener {
     private static final Logger logger = Logger.getLogger(PostFormAuditEventListener.class);
 
+    private static final String REQUEST_ATTRIBUTE_FORM = "com.surevine.alfresco.audit.FormData";
+    
     protected Map<String, FileItem> formItems;
 
     public PostFormAuditEventListener(final String uriDesignator, final String action, final String method) {
@@ -40,6 +42,10 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
 
     @SuppressWarnings("unchecked")
     private void parseFormFromRequest(final HttpServletRequest request) {
+        if(request.getAttribute(REQUEST_ATTRIBUTE_FORM) != null) {
+            formItems = (Map<String, FileItem>) request.getAttribute(REQUEST_ATTRIBUTE_FORM);
+        }
+        
         formItems = new TreeMap<String, FileItem>(String.CASE_INSENSITIVE_ORDER);
 
         ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
@@ -54,6 +60,8 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
             logger.error("Failure uploading file ", e);
             return;
         }
+        
+        request.setAttribute(REQUEST_ATTRIBUTE_FORM, formItems);
     }
 
     @Override
