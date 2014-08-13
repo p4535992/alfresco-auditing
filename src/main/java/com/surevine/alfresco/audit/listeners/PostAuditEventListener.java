@@ -57,7 +57,8 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
      */
     private static final Log logger = LogFactory.getLog(PostAuditEventListener.class);
 
-
+    private static final String REQUEST_ATTRIBUTE_JSON = "com.surevine.alfresco.audit.JSONData";
+    
     public PostAuditEventListener(final String uriDesignator, final String action, final String method) {
         super(uriDesignator, action, method);
     }
@@ -120,8 +121,8 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
      */
     public static JSONObject parseJSONFromPostContent(final HttpServletRequest request) {
 
-    	if(request.getAttribute("com.surevine.alfresco.audit.JSONData") != null) {
-    		return (JSONObject) request.getAttribute("com.surevine.alfresco.audit.JSONData");
+    	if(request.getAttribute(REQUEST_ATTRIBUTE_JSON) != null) {
+    		return (JSONObject) request.getAttribute(REQUEST_ATTRIBUTE_JSON);
     	}
     	
         JSONObject retVal = null;
@@ -151,7 +152,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
             }
         }
  
-        request.setAttribute("com.surevine.alfresco.audit.JSONData", retVal);
+        request.setAttribute(REQUEST_ATTRIBUTE_JSON, retVal);
 
         return retVal;
     }
