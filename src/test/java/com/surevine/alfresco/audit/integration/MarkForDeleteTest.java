@@ -24,7 +24,6 @@ package com.surevine.alfresco.audit.integration;
 import org.junit.Test;
 
 import com.surevine.alfresco.audit.Auditable;
-import com.surevine.alfresco.audit.integration.AbstractAuditIntegrationTestBase;
 import com.surevine.alfresco.audit.listeners.MarkForDeleteAuditEventListener;
 
 public class MarkForDeleteTest extends AbstractAuditIntegrationTestBase {

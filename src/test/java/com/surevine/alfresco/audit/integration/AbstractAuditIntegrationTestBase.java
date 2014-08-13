@@ -32,7 +32,6 @@ import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.web.app.servlet.AuthenticationHelper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockFilterChain;

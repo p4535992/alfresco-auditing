@@ -26,13 +26,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.springframework.mock.web.MockFilterChain;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.Auditable;
 import com.surevine.alfresco.audit.listeners.CreateDiscussionReplyAuditEventListener;
-import com.surevine.esl.EnhancedSecurityLabel;
 
 /**
  * @author garethferrier

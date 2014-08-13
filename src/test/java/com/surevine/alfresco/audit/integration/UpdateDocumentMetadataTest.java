@@ -21,13 +21,8 @@
 */
 package com.surevine.alfresco.audit.integration;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
-
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.Auditable;

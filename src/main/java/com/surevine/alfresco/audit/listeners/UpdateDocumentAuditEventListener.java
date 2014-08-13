@@ -24,15 +24,7 @@ package com.surevine.alfresco.audit.listeners;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
-
-import com.surevine.alfresco.audit.Auditable;
-import com.surevine.alfresco.audit.BufferedHttpServletResponse;
 
 /**
  * @author garethferrier

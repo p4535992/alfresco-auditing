@@ -33,7 +33,6 @@ import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.Auditable;
 import com.surevine.alfresco.audit.listeners.AbstractAuditEventListener;
 import com.surevine.alfresco.audit.listeners.MoveDocumentAuditEventListener;
-import com.surevine.esl.EnhancedSecurityLabel;
 
 /**
  * @author garethferrier
@@ -193,6 +192,7 @@ public class MoveDocumentTest extends AbstractAuditIntegrationTestBase {
      * "action": "moveFile", "id": "1", "nodeRef": "workspace:\/\/SpacesStore\/41e72ed6-d126-4a38-ae4e-cd38f6b0ceb8",
      * "type": "document", "success": false } ] }
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void testPartialFailureOfAMove() {
 

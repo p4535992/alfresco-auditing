@@ -46,6 +46,7 @@ public class DeleteFolderTest extends AbstractAuditIntegrationTestBase {
         super(new DeleteFolderAuditEventListener());
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     protected void onSetUp() throws Exception {
         super.onSetUp();

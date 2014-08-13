@@ -21,7 +21,6 @@
 */
 package com.surevine.alfresco.audit;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -240,43 +239,4 @@ public class SpringAuditFilterBean implements Filter {
     public void init(final FilterConfig arg0) throws ServletException {
         // Unused lifecycle method.
     }
-
-    /**
-     * Extract from the httpservletrequest the POST data and return it as a string.
-     * 
-     * @throws IOException
-     */
-    private String parsePostContent(final HttpServletRequest request) throws IOException {
-        BufferedInputStream bis = null;
-
-        StringBuilder sb = new StringBuilder();
-        try {
-            bis = new BufferedInputStream(request.getInputStream());
-            byte[] buffer = new byte[1024];
-
-            int bytesRead = 0;
-
-            // Keep reading from the stream while there is any content
-            // when the end of the stream has been reached, -1 is returned
-            while ((bytesRead = bis.read(buffer)) != -1) {
-                sb.append(new String(buffer, 0, bytesRead));
-            }
-
-        } catch (IOException io) {
-            logger.error("IOException caught parsing POST content " + io.getMessage());
-            throw io;
-        } finally {
-            try {
-                if (bis != null) {
-                    bis.close();    
-                }
-            } catch (IOException io) {
-                logger.error("IOException caught close input stream " + io.getMessage());
-                throw io;
-            }
-        }
-
-        return sb.toString();
-    }
-
 }

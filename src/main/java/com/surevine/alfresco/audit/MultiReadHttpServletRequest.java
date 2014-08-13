@@ -55,7 +55,7 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
         long cacheSize = CACHE_INITIAL_SIZE;
         cacheBytes = 0;
 
-        // Note that we don't necessarily trust the Content-Length header
+        // Note that we shouldn't trust the Content-Length header, but we will use it as a steer
         if (httpServletRequest.getHeader("Content-Length") != null) {
             try {
                 cacheSize = Long.parseLong(httpServletRequest.getHeader("Content-Length"));
@@ -83,8 +83,6 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
             if(bytesRead == -1) {
                 return;
             }
-            
-            //try testing is.available
             
             cacheBytes += bytesRead;
 

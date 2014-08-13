@@ -98,8 +98,6 @@ public class SafeMoveDocumentAuditEventListener extends PostAuditEventListener {
 
     }
 
-    private static final String DOCUMENT_LIBRARY = "documentLibrary";
-
     /**
      * Part of the URI used to identify the event.
      */

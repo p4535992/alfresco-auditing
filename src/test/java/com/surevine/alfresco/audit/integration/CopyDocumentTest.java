@@ -29,7 +29,6 @@ import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.Auditable;
 import com.surevine.alfresco.audit.listeners.AbstractAuditEventListener;
 import com.surevine.alfresco.audit.listeners.CopyDocumentAuditEventListener;
-import com.surevine.esl.EnhancedSecurityLabel;
 
 /**
  * @author garethferrier

@@ -21,7 +21,6 @@
 */
 package com.surevine.alfresco.audit.integration;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 

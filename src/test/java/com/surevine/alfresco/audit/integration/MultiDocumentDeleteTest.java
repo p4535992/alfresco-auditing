@@ -21,14 +21,11 @@
 */
 package com.surevine.alfresco.audit.integration;
 
-import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
-import com.surevine.alfresco.audit.Auditable;
 import com.surevine.alfresco.audit.listeners.MultiDocumentDeleteAuditEventListener;
 
 /**
