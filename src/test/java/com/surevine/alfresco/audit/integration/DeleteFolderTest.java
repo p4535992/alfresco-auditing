@@ -46,6 +46,7 @@ public class DeleteFolderTest extends AbstractAuditIntegrationTestBase {
         super(new DeleteFolderAuditEventListener());
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     protected void onSetUp() throws Exception {
         super.onSetUp();
@@ -57,14 +58,14 @@ public class DeleteFolderTest extends AbstractAuditIntegrationTestBase {
     public void testEventFired() {
 
         mockRequest.setRequestURI(requestURIString);
-        assertTrue(deleteFolderListener.isEventFired(mockRequest, null));
+        assertTrue(deleteFolderListener.isEventFired(mockRequest));
     }
     
     @Test
     public void testEventPopulation() throws JSONException {
         
         mockRequest.setRequestURI(requestURIString);
-        List<Auditable> events = deleteFolderListener.populateAuditItems(mockRequest, mockResponse, null);
+        List<Auditable> events = deleteFolderListener.populateAuditItems(mockRequest, mockResponse);
         
         if (events.size() == 1) {
             // Now make sure that the type is a folder

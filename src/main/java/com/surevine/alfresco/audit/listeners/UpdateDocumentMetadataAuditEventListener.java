@@ -118,7 +118,7 @@ public class UpdateDocumentMetadataAuditEventListener extends PostAuditEventList
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
 
         for (String desig : URI_DESIGNATORS) {
             if (request.getRequestURI().contains(desig)) {

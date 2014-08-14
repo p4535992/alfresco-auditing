@@ -27,7 +27,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONObject;
 import org.springframework.mock.web.MockFilterChain;
 
 /**

@@ -67,9 +67,9 @@ public class CreateWikiPageAuditEventListener extends PutAuditEventListener {
     public static final String JSON_PAGE_VALUE = "wiki-page";
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
 
-        JSONObject jsonObject = parseJSONFromPostContent(postContent);
+        JSONObject jsonObject = parseJSONFromPostContent(request);
         if (jsonObject != null && !jsonObject.has(AlfrescoJSONKeys.CURRENT_VERSION)
                 && jsonObject.has(AlfrescoJSONKeys.PAGE) && jsonObject.has(AlfrescoJSONKeys.PAGETITLE)) {
             try {

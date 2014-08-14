@@ -23,11 +23,9 @@ package com.surevine.alfresco.audit.integration;
 
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.surevine.alfresco.audit.Auditable;
-
 import com.surevine.alfresco.audit.listeners.AbstractAuditEventListener;
 import com.surevine.alfresco.audit.listeners.ViewWikiPageAuditEventListener;
 
@@ -95,6 +93,7 @@ public class ViewWikiPageTest extends AbstractAuditIntegrationTestBase {
 
     }
     
+    @SuppressWarnings("deprecation")
     @Test
     public void testWikiPageListViewNotAudited() {
         String wikiPageListURI = "/alfresco/wcs/slingshot/wiki/pages/sandbox";
@@ -102,6 +101,6 @@ public class ViewWikiPageTest extends AbstractAuditIntegrationTestBase {
         
         ViewWikiPageAuditEventListener viewWikiPageListener = (ViewWikiPageAuditEventListener)applicationContext.getBean("viewWikiPageAuditEventListener");
         
-        assertFalse("View of wiki main page incorrectly dealt with", viewWikiPageListener.isEventFired(mockRequest, ""));
+        assertFalse("View of wiki main page incorrectly dealt with", viewWikiPageListener.isEventFired(mockRequest));
     }
 }

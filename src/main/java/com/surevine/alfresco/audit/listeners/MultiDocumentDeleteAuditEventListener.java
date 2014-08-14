@@ -27,7 +27,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,17 +80,16 @@ public class MultiDocumentDeleteAuditEventListener extends PostAuditEventListene
      *      java.lang.String)
      */
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
 
         return (request.getRequestURI().contains(URI_DESIGNATOR) && "delete".equals(request.getParameter("alf_method")));
     }
 
     @Override
-    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response,
-            final String postContent) throws JSONException {
+    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response) throws JSONException {
         List<Auditable> events = new ArrayList<Auditable>();
 
-        JSONObject json = parseJSONFromPostContent(postContent);
+        JSONObject json = parseJSONFromPostContent(request);
 
         if (json != null && json.has(AlfrescoJSONKeys.NODEREFS)) {
             JSONArray nodeRefs = json.getJSONArray(AlfrescoJSONKeys.NODEREFS);

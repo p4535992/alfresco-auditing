@@ -62,9 +62,9 @@ public class RenameWikiPageAuditEventListener extends PostAuditEventListener {
     private static final Log logger = LogFactory.getLog(RenameWikiPageAuditEventListener.class);
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
 
-        JSONObject json = parseJSONFromPostContent(postContent);
+        JSONObject json = parseJSONFromPostContent(request);
         if (json != null) {
             return (json.has(AlfrescoJSONKeys.NAME) && json.has(AlfrescoJSONKeys.PAGE));
         }

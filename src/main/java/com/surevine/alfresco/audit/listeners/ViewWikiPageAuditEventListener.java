@@ -23,8 +23,6 @@ package com.surevine.alfresco.audit.listeners;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.service.cmr.repository.NodeRef;
-
 import com.surevine.alfresco.audit.Auditable;
 /**
  * @author garethferrier
@@ -69,13 +67,13 @@ public class ViewWikiPageAuditEventListener extends GetAuditEventListener {
     }
 
     @Override
-    public boolean isEventFired(HttpServletRequest request, String postContent) {
+    public boolean isEventFired(HttpServletRequest request) {
 
         //Need to be wary of the scenario where the wiki page list is accessed
         if (request.getRequestURI().contains(WIKI_PAGE_LIST_ACCESS_DESIGNATOR) ) {
             return false;
         } else {
-            return super.isEventFired(request, postContent);    
+            return super.isEventFired(request);    
         }
         
     }

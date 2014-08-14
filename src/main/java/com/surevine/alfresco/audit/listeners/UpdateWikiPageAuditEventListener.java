@@ -23,7 +23,6 @@ package com.surevine.alfresco.audit.listeners;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -62,9 +61,9 @@ public class UpdateWikiPageAuditEventListener extends PutAuditEventListener {
     private static final Log logger = LogFactory.getLog(UpdateWikiPageAuditEventListener.class);
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
 
-        JSONObject json = parseJSONFromPostContent(postContent);
+        JSONObject json = parseJSONFromPostContent(request);
         if (json != null) {
             if (json.has(AlfrescoJSONKeys.PAGE) && json.has(AlfrescoJSONKeys.CURRENT_VERSION)) {
                 try {

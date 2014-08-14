@@ -28,7 +28,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.Auditable;
-import com.surevine.alfresco.audit.listeners.AuditEventListener;
 import com.surevine.alfresco.audit.listeners.CreateWikiPageAuditEventListener;
 
 /**

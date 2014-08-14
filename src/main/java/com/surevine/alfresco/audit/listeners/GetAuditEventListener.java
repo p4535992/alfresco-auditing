@@ -55,7 +55,7 @@ public abstract class GetAuditEventListener extends AbstractAuditEventListener {
     /**
      * {@inheritDoc}
      */
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
         return request.getRequestURI().contains(this.getURIDesignator());
     }
 
@@ -63,8 +63,7 @@ public abstract class GetAuditEventListener extends AbstractAuditEventListener {
      * {@inheritDoc}
      * @throws JSONException 
      */
-    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response,
-            final String postContent) throws JSONException {
+    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response) throws JSONException {
 
         Auditable toAudit = new AuditItem();
         setGenericAuditMetadata(toAudit, request);

@@ -23,11 +23,10 @@ package com.surevine.alfresco.audit.listeners;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.json.JSONObject;
-import org.json.JSONException;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.Auditable;
@@ -73,9 +72,9 @@ public class RevertWikiPageAuditEventListener  extends PutAuditEventListener {
      * Looks just like a CREATE, except pageTitle isn't set
      */
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
 
-        JSONObject jsonObject = parseJSONFromPostContent(postContent);
+        JSONObject jsonObject = parseJSONFromPostContent(request);
         if (jsonObject != null && !jsonObject.has(AlfrescoJSONKeys.CURRENT_VERSION)
                 && jsonObject.has(AlfrescoJSONKeys.PAGE) && (!jsonObject.has(AlfrescoJSONKeys.PAGETITLE))) {
             try {

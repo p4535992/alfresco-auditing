@@ -23,8 +23,6 @@ package com.surevine.alfresco.audit.listeners;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.service.cmr.repository.NodeRef;
-
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.Auditable;
 
@@ -52,7 +50,7 @@ public class DeleteDiscussionAuditEventListener extends DeleteAuditEventListener
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String pageContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
         return "discussions-topicview".equals(request.getParameter(AlfrescoJSONKeys.PAGE));
     }
 

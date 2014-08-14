@@ -23,8 +23,6 @@ package com.surevine.alfresco.audit.listeners;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 

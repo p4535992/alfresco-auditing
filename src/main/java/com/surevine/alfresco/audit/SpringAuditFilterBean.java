@@ -21,7 +21,6 @@
 */
 package com.surevine.alfresco.audit;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -138,21 +137,17 @@ public class SpringAuditFilterBean implements Filter {
 
         String method = httpServletRequest.getMethod();
 
-        String postContent = null;
-
         // Only override current HttpServletRequest with custom implementation if post data
         // will be read.
         if (MULTI_READ_HTTP_METHODS.contains(method)) {
             httpServletRequest = new MultiReadHttpServletRequest(httpServletRequest);
-
-            postContent = parsePostContent(httpServletRequest);
         }
 
         // Now iterate over each of the installed listeners searching to see if, firstly the http methods match
         // and secondly that an event is fired.
         for (AuditEventListener listener : listeners) {
 
-            if (listener.getMethod().equals(method) && listener.isEventFired(httpServletRequest, postContent)) {
+            if (listener.getMethod().equals(method) && listener.isEventFired(httpServletRequest)) {
 
                 // Need to allow the output to be read twice from the response
                 httpServletResponse = new BufferedHttpServletResponse((HttpServletResponse) response);
@@ -180,7 +175,7 @@ public class SpringAuditFilterBean implements Filter {
                             || listener instanceof UndeleteAuditEventListener
                             || listener instanceof ImmediateArchiveAuditEventListener) {
                         itemsToAudit = listener
-                                .populateAuditItems(httpServletRequest, httpServletResponse, postContent);
+                                .populateAuditItems(httpServletRequest, httpServletResponse);
 
                         // Continue with the filter chain
                         timer.start();
@@ -200,7 +195,7 @@ public class SpringAuditFilterBean implements Filter {
                         httpServletResponse.finish();
                         
                         itemsToAudit = listener
-                                .populateAuditItems(httpServletRequest, httpServletResponse, postContent);
+                                .populateAuditItems(httpServletRequest, httpServletResponse);
   
                     }
 
@@ -244,43 +239,4 @@ public class SpringAuditFilterBean implements Filter {
     public void init(final FilterConfig arg0) throws ServletException {
         // Unused lifecycle method.
     }
-
-    /**
-     * Extract from the httpservletrequest the POST data and return it as a string.
-     * 
-     * @throws IOException
-     */
-    private String parsePostContent(final HttpServletRequest request) throws IOException {
-        BufferedInputStream bis = null;
-
-        StringBuilder sb = new StringBuilder();
-        try {
-            bis = new BufferedInputStream(request.getInputStream());
-            byte[] buffer = new byte[1024];
-
-            int bytesRead = 0;
-
-            // Keep reading from the stream while there is any content
-            // when the end of the stream has been reached, -1 is returned
-            while ((bytesRead = bis.read(buffer)) != -1) {
-                sb.append(new String(buffer, 0, bytesRead));
-            }
-
-        } catch (IOException io) {
-            logger.error("IOException caught parsing POST content " + io.getMessage());
-            throw io;
-        } finally {
-            try {
-                if (bis != null) {
-                    bis.close();    
-                }
-            } catch (IOException io) {
-                logger.error("IOException caught close input stream " + io.getMessage());
-                throw io;
-            }
-        }
-
-        return sb.toString();
-    }
-
 }

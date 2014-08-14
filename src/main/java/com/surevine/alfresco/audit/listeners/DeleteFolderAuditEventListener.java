@@ -52,7 +52,7 @@ public class DeleteFolderAuditEventListener extends DeleteAuditEventListener {
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String pageContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
 
         boolean retVal = false;
         if (request.getRequestURI().contains(URI_DESIGNATOR)) {

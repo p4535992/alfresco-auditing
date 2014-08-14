@@ -68,7 +68,7 @@ public interface AuditEventListener {
      * @throws JSONException 
      * @throws Exception
      */
-    List<Auditable> populateAuditItems(HttpServletRequest request, HttpServletResponse response, String postContent) throws JSONException;
+    List<Auditable> populateAuditItems(HttpServletRequest request, HttpServletResponse response) throws JSONException;
 
     /**
      * @return
@@ -77,7 +77,7 @@ public interface AuditEventListener {
 
     String getAction();
 
-    boolean isEventFired(HttpServletRequest request, String postContent);
+    boolean isEventFired(HttpServletRequest request);
 
     void decideSuccess(BufferedHttpServletResponse response, Auditable audit) throws JSONException, IOException;
     

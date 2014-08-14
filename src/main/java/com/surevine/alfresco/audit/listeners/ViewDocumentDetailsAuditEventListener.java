@@ -25,7 +25,6 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -66,7 +65,7 @@ public class ViewDocumentDetailsAuditEventListener extends GetAuditEventListener
     }
 
     @Override
-    public boolean isEventFired(HttpServletRequest request, String postContent) {        
+    public boolean isEventFired(HttpServletRequest request) {        
         return ((request.getRequestURI().contains(URI_DESIGNATOR)) && 
                 request.getParameter("shortQNames") == null);
     }

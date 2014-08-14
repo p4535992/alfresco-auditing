@@ -98,8 +98,6 @@ public class SafeMoveDocumentAuditEventListener extends PostAuditEventListener {
 
     }
 
-    private static final String DOCUMENT_LIBRARY = "documentLibrary";
-
     /**
      * Part of the URI used to identify the event.
      */
@@ -125,12 +123,11 @@ public class SafeMoveDocumentAuditEventListener extends PostAuditEventListener {
     }
 
     @Override
-    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response,
-            final String postContent) throws JSONException {
+    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response) throws JSONException {
 
         List<Auditable> events = new ArrayList<Auditable>();
 
-        JSONObject json = parseJSONFromPostContent(postContent);
+        JSONObject json = parseJSONFromPostContent(request);
 
         String destFolderNodeId = request.getRequestURI().substring(
                 request.getRequestURI().lastIndexOf("/") + 1);

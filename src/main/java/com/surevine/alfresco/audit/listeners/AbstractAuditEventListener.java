@@ -156,7 +156,6 @@ public abstract class AbstractAuditEventListener implements AuditEventListener {
      *            to get the security properties for
      * @return String defintion of the
      */
-    @SuppressWarnings("unchecked")
     protected String extractSecurityLabelFromRepo(final NodeRef nodeRef) {
         
         Map<QName, Serializable> properties  = nodeService.getProperties(nodeRef);

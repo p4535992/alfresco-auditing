@@ -22,22 +22,16 @@
 package com.surevine.alfresco.audit.listeners;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.surevine.alfresco.audit.AuditItem;
 import com.surevine.alfresco.audit.Auditable;
 import com.surevine.alfresco.audit.BufferedHttpServletResponse;
 import com.surevine.alfresco.audit.BufferedServletOutputStream;
@@ -46,7 +40,7 @@ import com.surevine.alfresco.audit.BufferedServletOutputStream;
  * @author garethferrier
  * 
  */
-public class UploadDocumentAuditEventListener extends PostAuditEventListener {
+public class UploadDocumentAuditEventListener extends PostFormAuditEventListener {
 
     /**
      * Logger for errors and warnings.
@@ -73,12 +67,16 @@ public class UploadDocumentAuditEventListener extends PostAuditEventListener {
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
-
-        // Need to interrogate the post content to see if there is a string to indicate an upload, rather than
-        // an update
-        return request.getRequestURI().contains(URI_DESIGNATOR)
-                && postContent.contains("\"overwrite\"" + MIME_LINE_DELIMITER + MIME_LINE_DELIMITER + "false");
+    public boolean isEventFired(final HttpServletRequest request) {
+        if(super.isEventFired(request)) {
+            FileItem formItem = formItems.get("overwrite");
+            
+            if((formItem != null) && formItem.getString().equalsIgnoreCase("false")) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     private static final char JSON_START_CHAR = '{';
@@ -87,14 +85,13 @@ public class UploadDocumentAuditEventListener extends PostAuditEventListener {
 
     @Override
     public void setSpecificAuditMetadata(final Auditable auditable, final HttpServletRequest request,
-            final JSONObject json, final BufferedHttpServletResponse response) throws JSONException {
+            final JSONObject json, final BufferedHttpServletResponse response) {
 
+        super.setSpecificAuditMetadata(auditable, request, json, response);
+        
         if (response == null) {
             throw new IllegalArgumentException("parameter was null");
         } else {
-
-            parseFromMIMEData(auditable, request, json);
-
             // Now need to decide if the response coming back is JSON in the clear or wrapped up in HTML.
             try {
                 byte[] responseBytes = ((BufferedServletOutputStream) response.getOutputStream())

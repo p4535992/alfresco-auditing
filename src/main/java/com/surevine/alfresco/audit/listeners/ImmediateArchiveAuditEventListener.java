@@ -21,18 +21,14 @@
 */
 package com.surevine.alfresco.audit.listeners;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.model.FileNotFoundException;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,7 +36,6 @@ import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.AuditItem;
 import com.surevine.alfresco.audit.Auditable;
 import com.surevine.alfresco.audit.BufferedHttpServletResponse;
-import com.surevine.alfresco.audit.NodeRefResolver;
 
 public class ImmediateArchiveAuditEventListener extends PostAuditEventListener {
 

@@ -27,7 +27,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,12 +66,11 @@ public class UpdateDocumentPermissionsAuditEventListener extends PostAuditEventL
     }
 
     @Override
-    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response,
-            final String postContent) throws JSONException {
+    public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response) throws JSONException {
 
         List<Auditable> events = new ArrayList<Auditable>();
 
-        JSONObject json = parseJSONFromPostContent(postContent);
+        JSONObject json = parseJSONFromPostContent(request);
 
         if (json != null && json.has(AlfrescoJSONKeys.NODEREFS)) {
             JSONArray arr = json.getJSONArray(AlfrescoJSONKeys.NODEREFS);

@@ -18,11 +18,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 package com.surevine.alfresco.audit;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,59 +34,125 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.alfresco.util.TempFileProvider;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
-	  private byte[] body;
+    private static final Logger logger = Logger.getLogger(MultiReadHttpServletRequest.class);
 
-	    public MultiReadHttpServletRequest(HttpServletRequest httpServletRequest) throws IOException {
-	        super(httpServletRequest);
-	        // Read the request body and save it as a byte array
-	        InputStream is = super.getInputStream();
-	        body = IOUtils.toByteArray(is);
-	    }
+    private static final int CACHE_INITIAL_SIZE = 1024 * 1024; // Start with a 1MB cache
+    private static final int CACHE_MAX_MEMORY_SIZE = 10 * 1024 * 1024; // We will cache up to 10MB before using disk
+    private static final int CACHE_INCREASE_SIZE = 1024 * 1024; // We will increase the size by 1MB each time
 
-		@Override
-	    public ServletInputStream getInputStream() throws IOException {
-	        return new ServletInputStreamImpl(new ByteArrayInputStream(body));
-	    }
-		
-		@Override
-	    public BufferedReader getReader() throws IOException {
-	        String enc = getCharacterEncoding();
-	        if (enc == null) {
-                enc = "UTF-8";
+    private byte[] cache;
+    private long cacheBytes;
+    private File cacheFile;
+
+    public MultiReadHttpServletRequest(HttpServletRequest httpServletRequest) throws IOException {
+        super(httpServletRequest);
+
+        long cacheSize = CACHE_INITIAL_SIZE;
+        cacheBytes = 0;
+
+        // Note that we shouldn't trust the Content-Length header, but we will use it as a steer
+        if (httpServletRequest.getHeader("Content-Length") != null) {
+            try {
+                cacheSize = Long.parseLong(httpServletRequest.getHeader("Content-Length"));
+            } catch (NumberFormatException e) {
+                logger.warn(
+                        "Invalid Content-Length header encountered:" + httpServletRequest.getHeader("Content-Length"),
+                        e);
             }
-	        return new BufferedReader(new InputStreamReader(getInputStream(), enc));
-	    }
+        }
 
+        InputStream is = super.getInputStream();
 
-		/**
-		 * @author garethferrier
-		 *
-		 */
-		private static class ServletInputStreamImpl extends ServletInputStream {
+        while (cacheSize <= CACHE_MAX_MEMORY_SIZE) {
+            // Start reading the stream to memory
+            byte[] newCache = new byte[(int) cacheSize];
 
-	        private InputStream is;
+            if (cache != null) {
+                System.arraycopy(cache, 0, newCache, 0, cache.length);
+            }
 
-	        public ServletInputStreamImpl(InputStream is) {
-	            this.is = is;
-	        }
+            cache = newCache;
 
-	        public int read() throws IOException {
-	            return is.read();
-	        }
+            int bytesRead = is.read(cache, (int) cacheBytes, (int) (cache.length - cacheBytes));
 
-	        public boolean markSupported() {
-	            return false;
-	        }
+            if(bytesRead == -1) {
+                return;
+            }
+            
+            cacheBytes += bytesRead;
 
-	        public synchronized void mark(int i) {
-	            throw new RuntimeException(new IOException("mark/reset not supported"));
-	        }
+            if (cacheBytes == cache.length) {
+                // We have filled the cache, let's increase the size
+                cacheSize += CACHE_INCREASE_SIZE;
+            } 
+        }
 
-	        public synchronized void reset() throws IOException {
-	            throw new IOException("mark/reset not supported");
-	        }
-	    }
+        // If we've got here we've either hit the cache limit, or the Content-Length was too big to start with
+        cacheFile = TempFileProvider.createTempFile("audit", "");
+        
+        FileOutputStream fos = new FileOutputStream(cacheFile);
+        
+        // If we have already cached some stuff, write it out to the file
+        if(cacheBytes > 0) {
+            fos.write(cache, 0, (int) cacheBytes);
+            cache = null;
+        }
+        
+        // Then copy the rest of the stream to the file
+        IOUtils.copy(is, fos);
+        
+        fos.close();
+    }
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+        if (cacheFile == null) {
+            return new ServletInputStreamImpl(new ByteArrayInputStream(cache, 0, (int) cacheBytes));
+        } else {
+            return new ServletInputStreamImpl(new FileInputStream(cacheFile));
+        }
+    }
+
+    @Override
+    public BufferedReader getReader() throws IOException {
+        String enc = getCharacterEncoding();
+        if (enc == null) {
+            enc = "UTF-8";
+        }
+        return new BufferedReader(new InputStreamReader(getInputStream(), enc));
+    }
+
+    /**
+     * @author garethferrier
+     * 
+     */
+    private static class ServletInputStreamImpl extends ServletInputStream {
+
+        private InputStream is;
+
+        public ServletInputStreamImpl(InputStream is) {
+            this.is = is;
+        }
+
+        public int read() throws IOException {
+            return is.read();
+        }
+
+        public boolean markSupported() {
+            return false;
+        }
+
+        public synchronized void mark(int i) {
+            throw new RuntimeException(new IOException("mark/reset not supported"));
+        }
+
+        public synchronized void reset() throws IOException {
+            throw new IOException("mark/reset not supported");
+        }
+    }
 }

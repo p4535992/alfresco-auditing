@@ -21,17 +21,11 @@
 */
 package com.surevine.alfresco.audit.listeners;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
-import com.surevine.alfresco.audit.AuditItem;
 import com.surevine.alfresco.audit.Auditable;
 import com.surevine.alfresco.audit.BufferedHttpServletResponse;
 

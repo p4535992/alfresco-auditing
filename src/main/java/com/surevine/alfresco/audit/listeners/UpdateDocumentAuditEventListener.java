@@ -24,21 +24,13 @@ package com.surevine.alfresco.audit.listeners;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
-
-import com.surevine.alfresco.audit.Auditable;
-import com.surevine.alfresco.audit.BufferedHttpServletResponse;
 
 /**
  * @author garethferrier
  * 
  */
-public class UpdateDocumentAuditEventListener extends PostAuditEventListener {
+public class UpdateDocumentAuditEventListener extends PostFormAuditEventListener {
     Logger logger = Logger.getLogger(UpdateDocumentAuditEventListener.class);
     
     /**
@@ -59,31 +51,15 @@ public class UpdateDocumentAuditEventListener extends PostAuditEventListener {
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
-        return request.getRequestURI().contains(URI_DESIGNATOR)
-            && postContent.contains("\"updateNodeRef\""
-            + UploadDocumentAuditEventListener.MIME_LINE_DELIMITER
-            + UploadDocumentAuditEventListener.MIME_LINE_DELIMITER + "workspace");
-    }
-
-    @Override
-    public void setSpecificAuditMetadata(final Auditable auditable, final HttpServletRequest request,
-            final JSONObject json, final BufferedHttpServletResponse response) {
-        parseFromMIMEData(auditable, request, json);
-        
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-        upload.setHeaderEncoding("UTF-8");
-        
-        try {
-            for (final Object o : upload.parseRequest(request)) {
-                FileItem item = (FileItem) o;
-                
-                if (item.isFormField() && "tags".equals(item.getFieldName())) {
-                    auditable.setTags(StringUtils.join(item.getString().trim().split(" "), ','));
-                }
+    public boolean isEventFired(final HttpServletRequest request) {
+        if(super.isEventFired(request)) {
+            FileItem formItem = formItems.get("updateNodeRef");
+            
+            if((formItem != null) && formItem.getString().startsWith("workspace")) {
+                return true;
             }
-        } catch (final FileUploadException e) {
-            logger.error("Error while parsing request form", e);
         }
+        
+        return false;
     }
 }

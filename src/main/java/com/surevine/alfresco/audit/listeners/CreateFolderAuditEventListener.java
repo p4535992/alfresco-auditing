@@ -30,7 +30,6 @@ import org.json.JSONObject;
 import com.surevine.alfresco.audit.AlfrescoJSONKeys;
 import com.surevine.alfresco.audit.Auditable;
 import com.surevine.alfresco.audit.BufferedHttpServletResponse;
-import com.surevine.esl.EnhancedSecurityLabel;
 
 /**
  * @author garethferrier
@@ -56,7 +55,7 @@ public class CreateFolderAuditEventListener extends PostAuditEventListener {
     }
 
     @Override
-    public boolean isEventFired(final HttpServletRequest request, final String postContent) {
+    public boolean isEventFired(final HttpServletRequest request) {
         return request.getRequestURI().contains(URI_DESIGNATOR);
     }
 
