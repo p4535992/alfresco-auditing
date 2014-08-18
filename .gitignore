@@ -3,3 +3,4 @@
 .svn/
 target/
 .DS_Store
+/bin
