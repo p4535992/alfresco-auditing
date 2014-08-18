@@ -23,7 +23,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.surevine.alfresco</groupId>
 	<artifactId>alfresco_accounting</artifactId>
-	<version>1.4.5-SNAPSHOT</version>
+	<version>1.5.0</version>
 
 
 	<!-- O R G A N I S A T I O N I N F O R M A T I O N -->
