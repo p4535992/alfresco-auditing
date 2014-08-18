@@ -23,7 +23,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.surevine.alfresco</groupId>
 	<artifactId>alfresco_accounting</artifactId>
-	<version>1.5.0-SNAPSHOT</version>
+	<version>1.5.0</version>
 
 
 	<!-- O R G A N I S A T I O N I N F O R M A T I O N -->
@@ -42,7 +42,7 @@
 	<!-- Required by the release plugin -->
 	<scm>
 		<developerConnection>scm:git:git@github.com:surevine/alfresco-auditing.git</developerConnection>
-	  <tag>HEAD</tag>
+	  <tag>alfresco_accounting-1.5.0</tag>
   </scm>
 
 	<!-- R E P O S I T O R I E S -->
