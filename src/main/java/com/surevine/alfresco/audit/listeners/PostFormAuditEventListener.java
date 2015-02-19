@@ -44,6 +44,7 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
     private void parseFormFromRequest(final HttpServletRequest request) {
         if(request.getAttribute(REQUEST_ATTRIBUTE_FORM) != null) {
             formItems = (Map<String, FileItem>) request.getAttribute(REQUEST_ATTRIBUTE_FORM);
+            return;
         }
         
         formItems = new TreeMap<String, FileItem>(String.CASE_INSENSITIVE_ORDER);
