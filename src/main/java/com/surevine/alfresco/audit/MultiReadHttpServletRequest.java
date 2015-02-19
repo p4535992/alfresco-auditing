@@ -139,10 +139,25 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
             this.is = is;
         }
 
+        @Override
+        public int read(byte[] b) throws IOException {
+            return is.read(b);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            return is.read(b, off, len);
+        }
+
+        @Override
+        public void close() throws IOException {
+            is.close();
+        }
+
         public int read() throws IOException {
             return is.read();
         }
-
+        
         public boolean markSupported() {
             return false;
         }
