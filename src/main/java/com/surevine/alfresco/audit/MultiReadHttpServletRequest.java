@@ -30,12 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
-import org.alfresco.util.TempFileProvider;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
@@ -46,19 +40,19 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
     private static final int CACHE_INCREASE_SIZE = 1024 * 1024; // We will increase the size by 1MB each time
 
     private byte[] cache;
-    private long cacheBytes;
+    private int cacheBytes;
     private File cacheFile;
 
     public MultiReadHttpServletRequest(HttpServletRequest httpServletRequest) throws IOException {
         super(httpServletRequest);
 
-        long cacheSize = CACHE_INITIAL_SIZE;
+        int cacheSize = CACHE_INITIAL_SIZE;
         cacheBytes = 0;
 
         // Note that we shouldn't trust the Content-Length header, but we will use it as a steer
         if (httpServletRequest.getHeader("Content-Length") != null) {
             try {
-                cacheSize = Long.parseLong(httpServletRequest.getHeader("Content-Length"));
+                cacheSize = Integer.parseInt(httpServletRequest.getHeader("Content-Length"));
             } catch (NumberFormatException e) {
                 logger.warn(
                         "Invalid Content-Length header encountered:" + httpServletRequest.getHeader("Content-Length"),
@@ -70,7 +64,7 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
 
         while (cacheSize <= CACHE_MAX_MEMORY_SIZE) {
             // Start reading the stream to memory
-            byte[] newCache = new byte[(int) cacheSize];
+            byte[] newCache = new byte[cacheSize];
 
             if (cache != null) {
                 System.arraycopy(cache, 0, newCache, 0, cache.length);
@@ -78,7 +72,7 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
 
             cache = newCache;
 
-            int bytesRead = is.read(cache, (int) cacheBytes, (int) (cache.length - cacheBytes));
+            int bytesRead = is.read(cache, cacheBytes, (cache.length - cacheBytes));
 
             if(bytesRead == -1) {
                 return;
@@ -99,7 +93,7 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
         
         // If we have already cached some stuff, write it out to the file
         if(cacheBytes > 0) {
-            fos.write(cache, 0, (int) cacheBytes);
+            fos.write(cache, 0, cacheBytes);
             cache = null;
         }
         
@@ -112,7 +106,7 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
     @Override
     public ServletInputStream getInputStream() throws IOException {
         if (cacheFile == null) {
-            return new ServletInputStreamImpl(new ByteArrayInputStream(cache, 0, (int) cacheBytes));
+            return new ServletInputStreamImpl(new ByteArrayInputStream(cache, 0, cacheBytes));
         } else {
             return new ServletInputStreamImpl(new FileInputStream(cacheFile));
         }
@@ -127,25 +121,36 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
         return new BufferedReader(new InputStreamReader(getInputStream(), enc));
     }
 
+    
+    
     /**
-     * @author garethferrier
-     * 
+     * Wrap an {@link InputStream} to make it look like a {@link ServletInputStream}
      */
     private static class ServletInputStreamImpl extends ServletInputStream {
 
         private InputStream is;
 
-        public ServletInputStreamImpl(InputStream is) {
+        public ServletInputStreamImpl(final InputStream is) {
             this.is = is;
         }
 
         @Override
-        public int read(byte[] b) throws IOException {
+        public long skip(final long n) throws IOException {
+            return is.skip(n);
+        }
+
+        @Override
+        public int available() throws IOException {
+            return is.available();
+        }
+
+        @Override
+        public int read(final byte[] b) throws IOException {
             return is.read(b);
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(final byte[] b, final int off, final int len) throws IOException {
             return is.read(b, off, len);
         }
 
@@ -154,20 +159,24 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
             is.close();
         }
 
+        @Override
         public int read() throws IOException {
             return is.read();
         }
         
+        @Override
         public boolean markSupported() {
-            return false;
+            return is.markSupported();
         }
 
-        public synchronized void mark(int i) {
-            throw new RuntimeException(new IOException("mark/reset not supported"));
+        @Override
+        public synchronized void mark(final int readlimit) {
+            is.mark(readlimit);
         }
 
+        @Override
         public synchronized void reset() throws IOException {
-            throw new IOException("mark/reset not supported");
+            is.reset();
         }
     }
 }
