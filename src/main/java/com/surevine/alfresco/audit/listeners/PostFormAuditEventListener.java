@@ -1,6 +1,6 @@
 package com.surevine.alfresco.audit.listeners;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -8,10 +8,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -25,7 +26,7 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
 
     private static final String REQUEST_ATTRIBUTE_FORM = "com.surevine.alfresco.audit.FormData";
     
-    protected Map<String, FileItem> formItems;
+    protected Map<String, FileItemStream> formItems;
 
     public PostFormAuditEventListener(final String uriDesignator, final String action, final String method) {
         super(uriDesignator, action, method);
@@ -43,21 +44,25 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
     @SuppressWarnings("unchecked")
     private void parseFormFromRequest(final HttpServletRequest request) {
         if(request.getAttribute(REQUEST_ATTRIBUTE_FORM) != null) {
-            formItems = (Map<String, FileItem>) request.getAttribute(REQUEST_ATTRIBUTE_FORM);
+            formItems = (Map<String, FileItemStream>) request.getAttribute(REQUEST_ATTRIBUTE_FORM);
             return;
         }
         
-        formItems = new TreeMap<String, FileItem>(String.CASE_INSENSITIVE_ORDER);
+        formItems = new TreeMap<String, FileItemStream>(String.CASE_INSENSITIVE_ORDER);
 
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+        ServletFileUpload upload = new ServletFileUpload();
         upload.setHeaderEncoding("UTF-8");
 
         try {
-            List<FileItem> mimeItems = upload.parseRequest(request);
-            for (FileItem item : mimeItems) {
+            FileItemIterator iter = upload.getItemIterator(request);
+            while (iter.hasNext()) {
+                FileItemStream item = iter.next();
                 formItems.put(item.getFieldName(), item);
             }
         } catch (FileUploadException e) {
+            logger.error("Failure uploading file ", e);
+            return;
+        } catch (IOException e) {
             logger.error("Failure uploading file ", e);
             return;
         }
@@ -84,37 +89,48 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
         String tmpNodeRef = null;
         String tmpUploadDir = null;
 
-        for (FileItem item : formItems.values()) {
+        for (FileItemStream item : formItems.values()) {
             if (!item.isFormField()) {
                 auditable.setSource(item.getName());
-            } else if ("siteId".equals(item.getFieldName())) {
-                auditable.setSite(item.getString());
+                continue;
+            }
+            
+            String value;
+            try {
+                value = Streams.asString(item.openStream());
+            } catch (IOException e) {
+                logger.error("IOError reading value for form field " + item.getFieldName(), e);
+                continue;
+            }
+            
+            if ("siteId".equals(item.getFieldName())) {
+                auditable.setSite(value);
             } else if (EnhancedSecurityLabel.OPEN_GROUPS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpOpenGroups = item.getString();
+                tmpOpenGroups = value;
             } else if (EnhancedSecurityLabel.CLOSED_GROUPS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpClosedGroups = item.getString();
+                tmpClosedGroups = value;
             } else if (EnhancedSecurityLabel.ORGANISATIONS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpOrganisations = item.getString();
+                tmpOrganisations = value;
             } else if (EnhancedSecurityLabel.ATOMAL_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpAtomal = item.getString();
+                tmpAtomal = value;
             } else if (EnhancedSecurityLabel.PROTECTIVE_MARKING_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpProtectiveMarking = item.getString();
+                tmpProtectiveMarking = value;
             } else if (EnhancedSecurityLabel.NATIONALITY_OWNER_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpNationalOwner = item.getString();
+                tmpNationalOwner = value;
             } else if (EnhancedSecurityLabel.NATIONAL_CAVEATS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
                 // This is the key when flash is not used.
-                tmpNationalityCaveats = item.getString();
+                tmpNationalityCaveats = value;
             } else if (EnhancedSecurityLabel.ESL_EYES.equalsIgnoreCase(item.getFieldName())) {
                 // This is the key when flash is used.
-                tmpNationalityCaveats = item.getString();
+                tmpNationalityCaveats = value;
             } else if (EnhancedSecurityLabel.CAVEATS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpCaveats = item.getString();
+                tmpCaveats = value;
             } else if ("updateNodeRef".equalsIgnoreCase(item.getFieldName())) {
-                tmpNodeRef = item.getString();
+                tmpNodeRef = value;
             } else if ("uploadDirectory".equalsIgnoreCase(item.getFieldName())) {
-                tmpUploadDir = item.getString();
+                tmpUploadDir = value;
             } else if ("tags".equalsIgnoreCase(item.getFieldName())) {
-                auditable.setTags(StringUtils.join(item.getString().trim().split(" "), ','));
+                auditable.setTags(StringUtils.join(value.trim().split(" "), ','));
             }
         }
 
