@@ -23,7 +23,7 @@ package com.surevine.alfresco.audit.listeners;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemStream;
 import org.apache.log4j.Logger;
 
 /**
@@ -53,9 +53,9 @@ public class UpdateDocumentAuditEventListener extends PostFormAuditEventListener
     @Override
     public boolean isEventFired(final HttpServletRequest request) {
         if(super.isEventFired(request)) {
-            FileItem formItem = formItems.get("updateNodeRef");
+            String formItemValue = formItemValues.get("updateNodeRef");
             
-            if((formItem != null) && formItem.getString().startsWith("workspace")) {
+            if((formItemValue != null) && formItemValue.startsWith("workspace")) {
                 return true;
             }
         }

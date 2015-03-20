@@ -27,6 +27,7 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
     private static final String REQUEST_ATTRIBUTE_FORM = "com.surevine.alfresco.audit.FormData";
     
     protected Map<String, FileItemStream> formItems;
+    protected Map<String, String> formItemValues;
 
     public PostFormAuditEventListener(final String uriDesignator, final String action, final String method) {
         super(uriDesignator, action, method);
@@ -132,6 +133,8 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
             } else if ("tags".equalsIgnoreCase(item.getFieldName())) {
                 auditable.setTags(StringUtils.join(value.trim().split(" "), ','));
             }
+            
+            formItemValues.put(item.getFieldName(), value);
         }
 
         // Now try to construct the ESL

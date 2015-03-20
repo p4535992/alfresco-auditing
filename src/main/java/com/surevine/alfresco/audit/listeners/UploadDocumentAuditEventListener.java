@@ -69,9 +69,9 @@ public class UploadDocumentAuditEventListener extends PostFormAuditEventListener
     @Override
     public boolean isEventFired(final HttpServletRequest request) {
         if(super.isEventFired(request)) {
-            FileItem formItem = formItems.get("overwrite");
+            String formItemValue = formItemValues.get("overwrite");
             
-            if((formItem != null) && formItem.getString().equalsIgnoreCase("false")) {
+            if((formItemValue != null) && formItemValue.equalsIgnoreCase("false")) {
                 return true;
             }
         }
