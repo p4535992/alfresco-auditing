@@ -78,6 +78,10 @@ public class MultiReadHttpServletRequestTest {
         byte[] result2 = IOUtils.toByteArray(request.getInputStream());
         assertTrue("result2 should equal the output array [" + testData.length + ", " + result2.length + "]",
                 Arrays.equals(testData, result2));
+        
+        testData = null;
+        result2 = null;
+        System.gc();
 
         return request;
     }

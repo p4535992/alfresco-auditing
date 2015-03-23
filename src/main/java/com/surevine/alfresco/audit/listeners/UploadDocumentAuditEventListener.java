@@ -26,7 +26,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -69,9 +68,9 @@ public class UploadDocumentAuditEventListener extends PostFormAuditEventListener
     @Override
     public boolean isEventFired(final HttpServletRequest request) {
         if(super.isEventFired(request)) {
-            String formItemValue = formItemValues.get("overwrite");
+            FileItemStreamWithValue formItem = formItems.get("overwrite");
             
-            if((formItemValue != null) && formItemValue.equalsIgnoreCase("false")) {
+            if((formItem != null) && formItem.getValue().equalsIgnoreCase("false")) {
                 return true;
             }
         }

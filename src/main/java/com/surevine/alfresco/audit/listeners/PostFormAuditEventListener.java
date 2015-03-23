@@ -22,12 +22,29 @@ import com.surevine.alfresco.audit.BufferedHttpServletResponse;
 import com.surevine.esl.EnhancedSecurityLabel;
 
 public abstract class PostFormAuditEventListener extends PostAuditEventListener {
+    public class FileItemStreamWithValue {
+        private FileItemStream fileItemStream;
+        private String value;
+        
+        public FileItemStreamWithValue(final FileItemStream fileItemStream, final String value) {
+            this.fileItemStream = fileItemStream;
+            this.value = value;
+        }
+        
+        public FileItemStream getFileItemStream() {
+            return fileItemStream;
+        }
+        
+        public String getValue() {
+            return value;
+        }
+    }
+    
     private static final Logger logger = Logger.getLogger(PostFormAuditEventListener.class);
 
     private static final String REQUEST_ATTRIBUTE_FORM = "com.surevine.alfresco.audit.FormData";
     
-    protected Map<String, FileItemStream> formItems;
-    protected Map<String, String> formItemValues;
+    protected Map<String, FileItemStreamWithValue> formItems;
 
     public PostFormAuditEventListener(final String uriDesignator, final String action, final String method) {
         super(uriDesignator, action, method);
@@ -45,11 +62,11 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
     @SuppressWarnings("unchecked")
     private void parseFormFromRequest(final HttpServletRequest request) {
         if(request.getAttribute(REQUEST_ATTRIBUTE_FORM) != null) {
-            formItems = (Map<String, FileItemStream>) request.getAttribute(REQUEST_ATTRIBUTE_FORM);
+            formItems = (Map<String, FileItemStreamWithValue>) request.getAttribute(REQUEST_ATTRIBUTE_FORM);
             return;
         }
         
-        formItems = new TreeMap<String, FileItemStream>(String.CASE_INSENSITIVE_ORDER);
+        formItems = new TreeMap<String, FileItemStreamWithValue>(String.CASE_INSENSITIVE_ORDER);
 
         ServletFileUpload upload = new ServletFileUpload();
         upload.setHeaderEncoding("UTF-8");
@@ -58,7 +75,20 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
             FileItemIterator iter = upload.getItemIterator(request);
             while (iter.hasNext()) {
                 FileItemStream item = iter.next();
-                formItems.put(item.getFieldName(), item);
+                
+                String value = null;
+                
+                if(item.isFormField()) {
+                    try {
+                        value = Streams.asString(item.openStream());
+                    } catch (IOException e) {
+                        logger.error("IOError reading value for form field " + item.getFieldName(), e);
+                        continue;
+                    }
+                }
+                
+                FileItemStreamWithValue fileItemStreamWithValue = new FileItemStreamWithValue(item, value);
+                formItems.put(item.getFieldName(), fileItemStreamWithValue);
             }
         } catch (FileUploadException e) {
             logger.error("Failure uploading file ", e);
@@ -90,51 +120,41 @@ public abstract class PostFormAuditEventListener extends PostAuditEventListener 
         String tmpNodeRef = null;
         String tmpUploadDir = null;
 
-        for (FileItemStream item : formItems.values()) {
-            if (!item.isFormField()) {
-                auditable.setSource(item.getName());
+        for (FileItemStreamWithValue item : formItems.values()) {
+            if (!item.getFileItemStream().isFormField()) {
+                auditable.setSource(item.getFileItemStream().getName());
                 continue;
             }
             
-            String value;
-            try {
-                value = Streams.asString(item.openStream());
-            } catch (IOException e) {
-                logger.error("IOError reading value for form field " + item.getFieldName(), e);
-                continue;
-            }
-            
-            if ("siteId".equals(item.getFieldName())) {
-                auditable.setSite(value);
-            } else if (EnhancedSecurityLabel.OPEN_GROUPS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpOpenGroups = value;
-            } else if (EnhancedSecurityLabel.CLOSED_GROUPS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpClosedGroups = value;
-            } else if (EnhancedSecurityLabel.ORGANISATIONS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpOrganisations = value;
-            } else if (EnhancedSecurityLabel.ATOMAL_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpAtomal = value;
-            } else if (EnhancedSecurityLabel.PROTECTIVE_MARKING_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpProtectiveMarking = value;
-            } else if (EnhancedSecurityLabel.NATIONALITY_OWNER_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpNationalOwner = value;
-            } else if (EnhancedSecurityLabel.NATIONAL_CAVEATS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
+            if ("siteId".equals(item.getFileItemStream().getFieldName())) {
+                auditable.setSite(item.getValue());
+            } else if (EnhancedSecurityLabel.OPEN_GROUPS_MIME_STR.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpOpenGroups = item.getValue();
+            } else if (EnhancedSecurityLabel.CLOSED_GROUPS_MIME_STR.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpClosedGroups = item.getValue();
+            } else if (EnhancedSecurityLabel.ORGANISATIONS_MIME_STR.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpOrganisations = item.getValue();
+            } else if (EnhancedSecurityLabel.ATOMAL_MIME_STR.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpAtomal = item.getValue();
+            } else if (EnhancedSecurityLabel.PROTECTIVE_MARKING_MIME_STR.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpProtectiveMarking = item.getValue();
+            } else if (EnhancedSecurityLabel.NATIONALITY_OWNER_MIME_STR.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpNationalOwner = item.getValue();
+            } else if (EnhancedSecurityLabel.NATIONAL_CAVEATS_MIME_STR.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
                 // This is the key when flash is not used.
-                tmpNationalityCaveats = value;
-            } else if (EnhancedSecurityLabel.ESL_EYES.equalsIgnoreCase(item.getFieldName())) {
+                tmpNationalityCaveats = item.getValue();
+            } else if (EnhancedSecurityLabel.ESL_EYES.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
                 // This is the key when flash is used.
-                tmpNationalityCaveats = value;
-            } else if (EnhancedSecurityLabel.CAVEATS_MIME_STR.equalsIgnoreCase(item.getFieldName())) {
-                tmpCaveats = value;
-            } else if ("updateNodeRef".equalsIgnoreCase(item.getFieldName())) {
-                tmpNodeRef = value;
-            } else if ("uploadDirectory".equalsIgnoreCase(item.getFieldName())) {
-                tmpUploadDir = value;
-            } else if ("tags".equalsIgnoreCase(item.getFieldName())) {
-                auditable.setTags(StringUtils.join(value.trim().split(" "), ','));
+                tmpNationalityCaveats = item.getValue();
+            } else if (EnhancedSecurityLabel.CAVEATS_MIME_STR.equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpCaveats = item.getValue();
+            } else if ("updateNodeRef".equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpNodeRef = item.getValue();
+            } else if ("uploadDirectory".equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                tmpUploadDir = item.getValue();
+            } else if ("tags".equalsIgnoreCase(item.getFileItemStream().getFieldName())) {
+                auditable.setTags(StringUtils.join(item.getValue().trim().split(" "), ','));
             }
-            
-            formItemValues.put(item.getFieldName(), value);
         }
 
         // Now try to construct the ESL
