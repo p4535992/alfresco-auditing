@@ -24,7 +24,7 @@
 	<groupId>com.surevine.alfresco</groupId>
 	<artifactId>alfresco_accounting</artifactId>
 	<version>1.6.0-SNAPSHOT</version>
-
+        <name>alfresco-accounting</name>
 
 	<!-- O R G A N I S A T I O N I N F O R M A T I O N -->
 	<organization>
