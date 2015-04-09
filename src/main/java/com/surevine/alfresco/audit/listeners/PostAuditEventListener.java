@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2008-2010 Surevine Limited.
- * 
+ *
  * Although intended for deployment and use alongside Alfresco this module should
  * be considered 'Not a Contribution' as defined in Alfresco'sstandard contribution agreement, see
  * http://www.alfresco.org/resource/AlfrescoContributionAgreementv2.pdf
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -47,9 +47,9 @@ import com.surevine.esl.EnhancedSecurityLabel;
 /**
  * This is the abstract event listener for http POST methods. It implements parsing of post data from the http request
  * object.
- * 
+ *
  * @author garethferrier
- * 
+ *
  */
 public abstract class PostAuditEventListener extends AbstractAuditEventListener {
     /**
@@ -58,7 +58,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
     private static final Log logger = LogFactory.getLog(PostAuditEventListener.class);
 
     private static final String REQUEST_ATTRIBUTE_JSON = "com.surevine.alfresco.audit.JSONData";
-    
+
     public PostAuditEventListener(final String uriDesignator, final String action, final String method) {
         super(uriDesignator, action, method);
     }
@@ -75,7 +75,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws JSONException
      */
     public List<Auditable> populateAuditItems(final HttpServletRequest request, final HttpServletResponse response) throws JSONException {
@@ -86,7 +86,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
             setSecurityLabel(toAudit, postContentJSONObject);
             setTags(toAudit, postContentJSONObject);
         }
-        
+
         setSpecificAuditMetadata(toAudit, request, postContentJSONObject, (BufferedHttpServletResponse) response);
         setGenericAuditMetadata(toAudit, request);
 
@@ -94,18 +94,18 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
         items.add(toAudit);
 
         populateSecondaryAuditItems(items, request, response, postContentJSONObject);
-        
+
         return items;
     }
-    
+
     /**
      * Method which can be overridden my listeners which may wish to add extra audit events based on posted data
-     * 
+     *
      * @param events the list of {@link Auditable} objects to which to add extra events
      * @param request
      * @param response
      * @param postContent the posted json
-     * @throws JSONException 
+     * @throws JSONException
      */
     protected void populateSecondaryAuditItems(final List<Auditable> events, final HttpServletRequest request,
             final HttpServletResponse response, final JSONObject postContent) throws JSONException {
@@ -114,7 +114,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
 
     /**
      * Assumes that the post content was a JSON string.
-     * 
+     *
      * @param postContent
      *            from the request
      * @return valid JSONObject, otherwise null
@@ -124,9 +124,9 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
     	if(request.getAttribute(REQUEST_ATTRIBUTE_JSON) != null) {
     		return (JSONObject) request.getAttribute(REQUEST_ATTRIBUTE_JSON);
     	}
-    	
+
         JSONObject retVal = null;
-        
+
         InputStream inStream;
         try {
             inStream = request.getInputStream();
@@ -134,10 +134,10 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
             logger.error("Error encountered while reading from the request stream", eIO);
             return null;
         }
-        
+
         InputStreamReader reader = new InputStreamReader(inStream);
         JSONTokener tokenizer = new JSONTokener(reader);
-        
+
         try {
             retVal = new JSONObject(tokenizer);
         } catch (JSONException e) {
@@ -146,12 +146,11 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
                 try {
                     logger.warn("Invalid JSON string parsed from post content " + IOUtils.toString(request.getInputStream()), e);
                 } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }            
+                    logger.error("IOException caught parsing request stream", e1);
+                }
             }
         }
- 
+
         request.setAttribute(REQUEST_ATTRIBUTE_JSON, retVal);
 
         return retVal;
@@ -159,7 +158,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
 
     /**
      * Utility method to set the tags (if changed) on a auditable item.
-     * 
+     *
      * @param toAudit
      *            the event
      * @param jsonObject
@@ -196,7 +195,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
 
     /**
      * Utility method to set the security label on an audit item based on json.
-     * 
+     *
      * @param toAudit
      * @param jsonObject
      */
@@ -225,7 +224,7 @@ public abstract class PostAuditEventListener extends AbstractAuditEventListener 
 
     /**
      * Default implementation. Can be used by some listeners.
-     * 
+     *
      * @param request
      *            the servlet request
      * @param postContent

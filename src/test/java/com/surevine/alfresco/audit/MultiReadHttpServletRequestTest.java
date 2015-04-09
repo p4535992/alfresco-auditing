@@ -49,7 +49,6 @@ public class MultiReadHttpServletRequestTest {
     }
 
     @Test
-    @Ignore
     public void testLargeRequestDoesntUseTonsOfMemory() throws Exception {
         System.gc();
         long freeBefore = Runtime.getRuntime().freeMemory();

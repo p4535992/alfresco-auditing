@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2008-2010 Surevine Limited.
- * 
+ *
  * Although intended for deployment and use alongside Alfresco this module should
  * be considered 'Not a Contribution' as defined in Alfresco'sstandard contribution agreement, see
  * http://www.alfresco.org/resource/AlfrescoContributionAgreementv2.pdf
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -57,12 +57,12 @@ import com.surevine.alfresco.audit.listeners.UnlockDocumentAuditEventListener;
 /**
  * Main entry point for the filter based auditing. This class will be executed by a Spring proxy installed as a filter -
  * an instance of this class is injected into the proxy.
- * 
+ *
  * It will identify at most one auditable event for any single call to the doFilter method based on the set of listeners
  * that are installed, again via spring config.
- * 
+ *
  * @author garethferrier
- * 
+ *
  */
 public class SpringAuditFilterBean implements Filter {
 
@@ -84,7 +84,7 @@ public class SpringAuditFilterBean implements Filter {
 
     /**
      * Spring available setter.
-     * 
+     *
      * @param listeners
      *            the set of AuditEventListeners to be configured with.
      */
@@ -106,7 +106,7 @@ public class SpringAuditFilterBean implements Filter {
 
     /**
      * Spring available setter.
-     * 
+     *
      * @param repository
      */
     public void setRepository(final AuditRepository repository) {
@@ -161,10 +161,10 @@ public class SpringAuditFilterBean implements Filter {
                     if (user != null) {
                         username = user.getUserName();
                     }
-                    
+
                     // Used to track total processing time for the request being audited
                     StopWatch timer = new StopWatch();
-                    
+
                     // There are certain listener types where we have to construct the audit items prior to passing to
                     // the filter
                     // chain.
@@ -190,13 +190,13 @@ public class SpringAuditFilterBean implements Filter {
                         timer.start();
                         filterChain.doFilter(httpServletRequest, httpServletResponse);
                         timer.stop();
-                        
+
                         // Calling finish on the response will release the output stream back to the client.
                         httpServletResponse.finish();
-                        
+
                         itemsToAudit = listener
                                 .populateAuditItems(httpServletRequest, httpServletResponse);
-  
+
                     }
 
                     for (Auditable audit : itemsToAudit) {
@@ -215,11 +215,10 @@ public class SpringAuditFilterBean implements Filter {
                 } catch (DataIntegrityViolationException e) {
                     logger.error("Data Integrity Exception caught during audit, " + e.getMessage());
                     throw new ServletException("A Data Integreity Violation occured.  Please see the logs for more information");
-          
+
                 } catch (Exception e) {
-                    
+
                     logger.error("Exception caught during audit " + e.getMessage());
-                    e.printStackTrace();
                     throw new ServletException(e);
                 }
 
